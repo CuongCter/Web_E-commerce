@@ -38,15 +38,15 @@ const SignUp = () => {
     });
     const onSubmit = async (values) => {
         try {
-            const res = axios.post('http://103.90.227.133:8082/api/v1/auth/signup', {
+            const res = axios.post('http://157.245.156.13:8082/api/v1/auth/signup', {
                 fullName: values.name,
                 email: values.email,
                 password: values.password,
             })
-
+            console.log(res);
             toast.success("Tạo tài khoản thành công !");
             toast.success("Vui lòng kiểm tra email của bạn");
-            navigate("/login");
+            // navigate("/login");
         } catch (error) {
             toast.error("Something went wrong!");
         }

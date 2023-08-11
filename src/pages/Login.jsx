@@ -1,10 +1,18 @@
 import React, { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import { NavLink, useNavigate } from 'react-router-dom'
+import Input from '../components/input/Input'
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import InputPassword from '../components/input/InputPassword';
+import ButtonLoading from '../components/button/ButtonLoading';
 import { toast } from "react-toastify";
+import axios from 'axios'
 import useAuth from '../services/useAuth';
+import { postLogin } from '../apis/auth/auth.api';
 import IconEye from '../icons/IconEye';
 import IconEyeSlash from '../icons/IconEyeSlash';
-
+import storageService from '../services/storage.service';
 
 const Login = () => {
 
@@ -13,31 +21,34 @@ const Login = () => {
     const [password, setPassword] = useState('')
 
     const navigate = useNavigate()
-    // async function handleSubmitLogin() {
-    //     postLogin(email, password).then((data) => {
-    //         console.log(data.data.user.id)
-    //         console.log(data.data.user)
-    //         if (data.data.user.role.id == 1) {
-    //             navigate('/admin', { replace: true })
-    //             toast.success("Đăng nhập thành công !")
-    //             const accessToken = data?.data?.token
-    //             setAuth({ accessToken })
-    //             localStorage.setItem('accessToken', accessToken)
-    //             localStorage.setItem('roleID', data.data.user.role.id)
-    //         }
-    //         else if (data) {
-    //             const accessToken = data?.data?.token
-    //             setAuth({ accessToken })
-    //             // console.log(accessToken);
-    //             localStorage.setItem('accessToken', accessToken)
-    //             navigate('/', { replace: true })
-    //             toast.success("Đăng nhập thành công!")
-    //             storageService.set('id', data.data.user.id)
-    //             storageService.set('email', data.data.user.email)
-    //             storageService.set('name', data.data.user.fullName)
-    //         }
-    //     })
-    // }
+    async function handleSubmitLogin() {
+        // http://20.210.177.113:3333/api/v1/auth/login
+        //
+        postLogin(email, password).then((data) => {
+            console.log(data.data.user.id)
+            console.log(data.data.user)
+            // console.log(email + password);
+            if (data.data.user.role.id == 1) {
+                navigate('/admin', { replace: true })
+                toast.success("Đăng nhập thành công !")
+                const accessToken = data?.data?.token
+                setAuth({ accessToken })
+                localStorage.setItem('accessToken', accessToken)
+                localStorage.setItem('roleID', data.data.user.role.id)
+            }
+            else if (data) {
+                const accessToken = data?.data?.token
+                setAuth({ accessToken })
+                // console.log(accessToken);
+                localStorage.setItem('accessToken', accessToken)
+                navigate('/', { replace: true })
+                toast.success("Đăng nhập thành công!")
+                storageService.set('id', data.data.user.id)
+                storageService.set('email', data.data.user.email)
+                storageService.set('name', data.data.user.fullName)
+            }
+        })
+    }
 
     const [showPass, setShowPass] = useState(false);
     const showPassword = () => {
@@ -105,7 +116,7 @@ const Login = () => {
                             className="mt-2 w-full h-[45px] text-white bg-primary rounded-md font-semibold "
                             type={'submit'}
                             value="Sign In"
-                            // onClick={handleSubmitLogin}
+                            onClick={handleSubmitLogin}
                         />
                         <NavLink to={'/forgot-password'}>
                             <div className='text-right mb-5 text-sm font-medium z-10 cursor-pointer text-primary'>Forgot password ?</div>
