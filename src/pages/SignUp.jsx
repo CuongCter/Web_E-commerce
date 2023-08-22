@@ -37,7 +37,9 @@ const SignUp = () => {
         mode: "onChange",
     });
     const onSubmit = async (values) => {
+        console.log("a");
         try {
+       
             const res = axios.post('http://157.245.156.13:8082/api/v1/auth/signup', {
                 fullName: values.name,
                 email: values.email,
@@ -73,6 +75,7 @@ const SignUp = () => {
                             Sign In
                         </NavLink>
                     </p>
+                    
                     <h3 className="text-2xl font-semibold mb-2 z-10">Sign Up</h3>
                     <form
                         onSubmit={handleSubmit(onSubmit)}

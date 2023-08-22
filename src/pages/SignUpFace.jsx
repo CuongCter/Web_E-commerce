@@ -1,62 +1,49 @@
-import React, { useEffect, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import React from 'react'
+import { useForm } from "react-hook-form";
 import { NavLink, useNavigate } from 'react-router-dom'
-import Input from '../components/input/Input'
+import { toast } from "react-toastify";
+import ButtonLoading from "../components/button/ButtonLoading";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import InputPassword from '../components/input/InputPassword';
-import ButtonLoading from '../components/button/ButtonLoading';
-import { toast } from "react-toastify";
-import axios from 'axios'
-import useAuth from '../services/useAuth';
-import { postLogin } from '../apis/auth/auth.api';
+import Input from "../components/input/Input";
+import InputPassword from "../components/input/InputPassword";
+import axios from 'axios';
+import { useState } from 'react';
 import IconEye from '../icons/IconEye';
 import IconEyeSlash from '../icons/IconEyeSlash';
-import storageService from '../services/storage.service';
-
-const Login = () => {
-
-    const { setAuth } = useAuth()
+const SignUpFace = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-
-    const navigate = useNavigate()
-    async function handleSubmitLogin() {
-        // http://20.210.177.113:3333/api/v1/auth/login
-        //
-        postLogin(email, password).then((data) => {
-            console.log(data.data.user.id)
-            console.log(data.data.user)
-            // console.log(email + password);
-            if (data.data.user.role.id == 1) {
-                navigate('/admin', { replace: true })
-                toast.success("Đăng nhập thành công !")
-                const accessToken = data?.data?.token
-                setAuth({ accessToken })
-                localStorage.setItem('accessToken', accessToken)
-                localStorage.setItem('roleID', data.data.user.role.id)
-            }
-            else if (data) {
-                const accessToken = data?.data?.token
-                setAuth({ accessToken })
-                // console.log(accessToken);
-                localStorage.setItem('accessToken', accessToken)
-                navigate('/', { replace: true })
-                toast.success("Đăng nhập thành công!")
-                storageService.set('id', data.data.user.id)
-                storageService.set('email', data.data.user.email)
-                storageService.set('name', data.data.user.fullName)
-            }
-        })
-    }
-
     const [showPass, setShowPass] = useState(false);
+    const [file, setFile] = useState(null);
     const showPassword = () => {
         setShowPass(true);
     };
     const hiddenPassword = () => {
         setShowPass(false);
     };
+    const handleFileChange = (e) => {
+        // Get the selected file from the file input
+        const selectedFile = e.target.files[0];
+        setFile(selectedFile); // Store the selected file in the state
+    };
+    async function handleSubmitSignInFace() {
+        try {
+            const formData = new FormData(); // Create a new FormData object
+            formData.append('image', file); // Append the uploaded file to the FormData object
+            formData.append('email', email);
+            formData.append('password', password);
+
+            const res = await axios.post('http://127.0.0.1:6868/upload_image', formData);
+            console.log(res);
+            toast.success("Tạo tài khoản thành công !");
+            // navigate("/login");
+        } catch (error) {
+            toast.error("Something went wrong!");
+        }
+    }
+
+
     return (
         <div className='w-full h-screen bg-primary bg-opacity-10'>
             <div className='container w-full h-screen p-5 relative flex justify-center items-center'>
@@ -66,28 +53,29 @@ const Login = () => {
                 <div className="login max-w-[500px] w-full mx-auto p-10 flex flex-col items-center relative shadow-2xl rounded-lg">
                     <h4 className="text-xl font-semibold mb-2 z-10">Chào mừng trở lại!</h4>
                     <p className="mb-5 text-sm font-medium z-10">
-                        Bạn chưa có tài khoản?{" "}
-                        <NavLink to={"/signup"} className="sm:text-primary text-error">
-                            Sign Up
+                        Đăng nhập?{" "}
+                        <NavLink to={"/login"} className="sm:text-primary text-error">
+                            Sign In
                         </NavLink>
                     </p>
-                    <p className="mb-5 text-sm font-medium z-10">
-                        Bạn chưa có tài khoản Face?{" "}
-                        <NavLink to={"/signupFace"} className="sm:text-primary text-error">
-                            Sign Up Face
-                        </NavLink>
-                    </p>
-                    <h3 className="text-2xl font-semibold mb-5 z-10">Sign In</h3>
+                    <h3 className="text-2xl font-semibold mb-5 z-10">Sign Up Face</h3>
                     <div
 
                         autoComplete="off"
                         className="flex flex-col gap-5 w-[90%] z-10"
                     >
                         <div className="flex flex-col gap-2 text-sm font-medium items-start z-10">
+                            <label htmlFor="fileInput" className='font-bold'>Upload Image</label>
+                            <input
+                                type="file"
+                                id="fileInput"
+                                onChange={handleFileChange} // Call the handleFileChange function when the file input changes
+                            />
+                        </div>
+                        <div className="flex flex-col gap-2 text-sm font-medium items-start z-10">
                             <label htmlFor="Email" className='font-bold '>Email</label>
                             <input type="email"
                                 id="Email"
-                                // value={valueAuth.email}
                                 placeholder="example@gmail.com"
                                 className={`w-full border rounded-md px-5 py-3 text-sm `}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -121,20 +109,15 @@ const Login = () => {
                         <input
                             className="mt-2 w-full h-[45px] text-white bg-primary rounded-md font-semibold "
                             type={'submit'}
-                            value="Sign In"
-                            onClick={handleSubmitLogin}
+                            value="Create FaceID"
+                            onClick={handleSubmitSignInFace}
                         />
-                        <div className='flex justify-between'>
-                            <NavLink to={'/loginFace'}>
-                                <div className='text-right mb-5 text-sm font-medium z-10 cursor-pointer text-primary'>Login Face</div>
-                            </NavLink>
-                            <NavLink to={'/forgot-password'}>
-                                <div className='text-left mb-5 text-sm font-medium z-10 cursor-pointer text-primary'>Forgot password ?</div>
-                            </NavLink>
-                        </div>
-                        
+                        <NavLink to={'/forgot-password'}>
+                            <div className='text-right mb-5 text-sm font-medium z-10 cursor-pointer text-primary'>Forgot password ?</div>
+                        </NavLink>
+
                     </div>
-                    <div className="absolute -left-[350px] -bottom-[150px] w-[450px] h-[450px] -z-10">
+                    <div className="absolute -left-[250px] -bottom-[150px] w-[450px] h-[450px] -z-10">
                         <svg
                             id="10015.io"
                             viewBox="0 0 480 480"
@@ -167,4 +150,4 @@ const Login = () => {
     )
 }
 
-export default Login
+export default SignUpFace

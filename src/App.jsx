@@ -19,6 +19,8 @@ import Orders from './admin/components/pages/Orders';
 import Customers from './admin/components/pages/Customers';
 import { Category } from '@mui/icons-material';
 import CategoryQL from './admin/components/pages/CategoryQL';
+import SignUpFace from './pages/SignUpFace';
+import LoginFace from './pages/LoginFace';
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
         </Route>
         <Route path='/login' element={<Login></Login>}/>
         <Route path='/signup' element={<SignUp></SignUp>}/>
+        <Route path='/signupFace' element={<SignUpFace></SignUpFace>}/>
+        <Route path='/loginFace' element = {<LoginFace></LoginFace>}/>
         <Route path='/forgot-password' element={<ForgotPassword></ForgotPassword>}></Route>
         <Route  element= {<Admin></Admin>}>
             <Route path='/admin' element={<MainDash></MainDash>}></Route>
