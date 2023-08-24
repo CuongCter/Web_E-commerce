@@ -38,6 +38,7 @@ const MainDash = () => {
     }
     fetchTotal()
   }, [])
+  
   const fecthTotalDate = async () =>{
     try{
       const res = await axios.post(`${API}/statistics/report-revenue`, {

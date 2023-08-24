@@ -9,6 +9,7 @@ import { toast } from 'react-toastify'
 const Customers = () => {
   const [customer, setCustomer] = useState([])
   const [token, setToken] = useState('');
+  const [fullName, setFullName] = useState('')
   const [idUser, setIdUser] = useState("")
   const [showModal, setShowModal] = useState(false);
   const [showModalDelete, setShowModalDelete] = useState(false);
@@ -26,8 +27,9 @@ const Customers = () => {
     }
     fetchCustomer()
   }, [])
-  const handleEditUser = (id) => {
+  const handleEditUser = (id, fullName) => {
     setIdUser(id)
+    setFullName(fullName)
     setShowModal(true)
   }
   const [values, setValues] = useState({
@@ -37,6 +39,7 @@ const Customers = () => {
     address: "",
     gender: ""
   })
+
   const config = {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -90,8 +93,8 @@ const Customers = () => {
             <th className="bg-blue-300 border  px-4 py-2">Phone</th>
             <th className="bg-blue-300 border  px-4 py-2">Birthday</th>
             <th className="bg-blue-300 border  px-4 py-2">Gender</th>
-            <th className="bg-blue-300 border  px-4 py-2">Action</th>
             <th className="bg-blue-300 border  px-4 py-2">Address</th>
+            <th className="bg-blue-300 border  px-4 py-2">Action</th>
           </tr>
         </thead>
         <tbody>
@@ -108,7 +111,7 @@ const Customers = () => {
                 <td className="border px-4 py-2">{`${item.address}` ? `${item.address}` : "Update later"}</td>
                 <td className="border text-left px-4 py-2 flex justify-center">
                   <div className='mx-3 cursor-pointer'
-                    onClick={() => handleEditUser(item.id)}
+                    onClick={() => handleEditUser(item.id ,item.fullName)}
                   >
                     <ModeEditIcon className='hover:text-white'></ModeEditIcon></div>
                   <div className='mx-3 cursor-pointer'><DeleteIcon className='hover:text-white' onClick={()=>handleDelete(item.id)} ></DeleteIcon></div>
@@ -118,7 +121,8 @@ const Customers = () => {
           }
         </tbody>
       </table>
-      {showModal && (
+      
+      { showModal && (
         <div className="modal fixed z-10 inset-0 overflow-y-auto ">
           <div className="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
 
@@ -139,6 +143,7 @@ const Customers = () => {
                     Full mame:
                   </label>
                   <input
+                    value={fullName}
                     type="text"
                     id="fullName"
                     name="fullName"
@@ -195,6 +200,7 @@ const Customers = () => {
                     name='gender'
                     onChange={handleInput}
                     className="border border-gray-400 p-2 w-full rounded-md"
+                    
                   />
                 </div>
               </div>

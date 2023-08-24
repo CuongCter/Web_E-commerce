@@ -1,59 +1,73 @@
 import axios from 'axios';
 import React from 'react'
 import { useState } from 'react';
+import { useEffect } from 'react';
 import { useRef } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify';
 import Webcam from 'react-webcam';
+
 const LoginFace = () => {
     const webcamRef = useRef(null);
     const [capturedImage, setCapturedImage] = useState(null);
     const navigate = useNavigate()
     const token = localStorage.getItem('accessToken')
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+
+            checkImage();
+        }, 500);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, [capturedImage]);
+
     const captureImage = () => {
         const webcam = webcamRef.current;
 
         // Check if webcam is available
         if (!webcam) return;
-    
+
         // Capture the current frame from the webcam
         const imageSrc = webcam.getScreenshot();
         setCapturedImage(imageSrc);
-        toast.success("Chọn thành công")
     };
-    const convertToJPEG = (imageSrc) => {
-        const canvas = document.createElement('canvas');
-        const img = new Image();
-    
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-          const dataURL = canvas.toDataURL('image/jpeg');
-          setCapturedImage(dataURL);
-        };
-    
-        img.src = imageSrc;
-      };
-    const checkImage = async () => {
-        console.log('a');
-        if (capturedImage) {
-            convertToJPEG(capturedImage)
-            try {
-                // Call the API with the captured image as data in the request body
-                const response = await axios.post('http://127.0.0.1:6868/check', {
-                    image: capturedImage,
-                });
 
-                // Handle the API response
+    const checkImage = async () => {
+        captureImage();
+        if (capturedImage) {
+            try {
+                // Convert the base64-encoded image to a Blob object
+                const dataURI = capturedImage.split(',')[1]; // Remove the data URL prefix
+                const byteString = atob(dataURI);
+                const mimeString = 'image/jpeg'; // Assuming the captured image format is JPEG
+                const arrayBuffer = new ArrayBuffer(byteString.length);
+                const uint8Array = new Uint8Array(arrayBuffer);
+                for (let i = 0; i < byteString.length; i++) {
+                    uint8Array[i] = byteString.charCodeAt(i);
+                }
+                const blob = new Blob([arrayBuffer], { type: mimeString });
+                // Create a new FormData object
+                const formData = new FormData();
+                formData.append('image', blob, 'capturedImage.jpg');
+                console.log(formData);
+
+                // Call the API with the captured image as data in the request body
+                const response = await axios.post('http://127.0.0.1:6868/check', formData);
                 console.log(response);
+                // Handle the API response
+               
+                if(response.data.email != null || response.data.pass != null){
+                     navigate('/');
+                     localStorage.setItem('accessToken', 'faceID');
+                }
+                
                 
             } catch (error) {
                 // Handle any errors that occur during the API call
                 console.error(error);
-                localStorage.setItem('accessToken', "face")
-                navigate('/')
             }
         }
     };
@@ -77,11 +91,9 @@ const LoginFace = () => {
                         autoComplete="off"
                         className="flex flex-col gap-5 w-[90%] z-10"
                     >
-                        <div className="flex flex-col gap-2 text-sm font-medium items-start z-10">
-
-                        </div>
-                        <div className="flex flex-col gap-2 text-sm font-medium items-start z-10    ">
-
+                        {/* Captured Image */}
+                        <div id='captured-image' className='hidden'>
+                            <img src={capturedImage} alt='Captured' />
                         </div>
                         {/* Webcam and Capture Button */}
                         <div className='absolute top-0 left-0 right-0 bottom-0 flex flex-col items-center justify-center z-20'>
@@ -89,24 +101,14 @@ const LoginFace = () => {
                                 audio={false}
                                 ref={webcamRef}
                                 mirrored={true} // Set to true if you want to mirror the webcam feed
-                                screenshotFormat='image/png'
+                                screenshotFormat='image/jpeg'
                                 className='w-auto h-auto'
                             />
-                            <button onClick={captureImage} className='text-primary shadow-lg shadow-indigo-800/50 w-full py-4 m-5 text-white font-medium bg-primary transition-all rounded-md'>
-                                Chọn ảnh khung này
-                            </button>
-                            <button onClick={checkImage} className='text-primary shadow-lg shadow-indigo-800/50 w-full py-4 text-white font-medium bg-primary transition-all rounded-md'>
-                                Kiểm tra
-                            </button>
+
+                            {/* <button onClick={checkImage} className='text-primary shadow-lg shadow-indigo-800/50 w-full py-4 text-white font-medium bg-primary transition-all rounded-md'>
+                                Đăng nhập
+                            </button> */}
                         </div>
-                        {/* <div className='flex justify-between'>
-                            <NavLink to={'/signupFace'}>
-                                <div className='text-right mb-5 text-sm font-medium z-10 cursor-pointer text-primary'>Sign Up Face</div>
-                            </NavLink>
-                            <NavLink to={'/forgot-password'}>
-                                <div className='text-left mb-5 text-sm font-medium z-10 cursor-pointer text-primary'>Forgot password ?</div>
-                            </NavLink>
-                        </div> */}
 
                     </div>
                     <div className="absolute -left-[350px] -bottom-[150px] w-[450px] h-[450px] -z-10">

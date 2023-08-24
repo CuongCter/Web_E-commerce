@@ -37,7 +37,7 @@ const HomePage = () => {
             {
                 breakpoint: 768,
                 settings: {
-                    slidesToShow: 2,
+                    slidesToShow: 2,    
                     slidesToScroll: 2,
                 },
             },
